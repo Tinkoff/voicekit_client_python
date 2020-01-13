@@ -1,0 +1,11 @@
+venv
+audio
+.idea
+speech_utils.egg-info
+dist
+build
+ca.pem
+__pycache__/
+input.txt
+input2.txt
+test.py
