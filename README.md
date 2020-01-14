@@ -2,7 +2,7 @@
 
 ### Usage
 #### Install from PyPi
-pip install tinkoff_voicekit_client
+pip install tinkoff-voicekit-client
 
 
 #### Common
