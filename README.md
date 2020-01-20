@@ -1,12 +1,20 @@
 # Tinkoff Python Speech API examples
 
 ### Usage
-#### Install from PyPi
+#### Install from [PyPi](https://pypi.org/project/tinkoff-voicekit-client/)
+```bash
 pip install tinkoff-voicekit-client
+```
 
 
 #### Common
-Return documentation for public methods
+Before using you must have *API_KEY* and *SECRET_KEY*. You can get the keys by leaving a request on our [website](https://voicekit.tinkoff.ru/).
+
+Examples of using [VoiceKit](https://voicekit.tinkoff.ru/) client:
+* [Recognition examples](#####-Example-of-using-STT)
+* [Synthesize examples](#####-Example-of-using-TTS)
+
+Call documentation for public methods
 ```python
 client.something_method.__doc__
 ```
@@ -15,7 +23,7 @@ Methods initialize using config (Python dict) which satisfies one of the next js
 #### Recogniton (STT)
 Base types schema:
 ```Python
-definitions = {
+types_value_definitions = {
         "StringArray": {
             "type": "array",
             "items": {
@@ -98,7 +106,7 @@ streaming_recognition_config_schema = {
     }
 ```
 
-Example of using STT
+##### Example of using STT
 ```python
 from tinkoff_voicekit_client import ClientSTT
 
@@ -107,14 +115,14 @@ SECRET_KEY = "my_secret_key"
 
 client = ClientSTT(API_KEY, SECRET_KEY)
 
-my_config = {
+audio_config = {
     "encoding": "LINEAR16",
     "sample_rate_hertz": 8000,
     "num_channels": 1
 }
 
 # recognise method call
-response = client.recognize("path/to/audio/file", my_config)
+response = client.recognize("path/to/audio/file", audio_config)
 print(response)
 ```
 
@@ -126,12 +134,12 @@ SECRET_KEY = "my_secret_key"
 
 client = ClientSTT(API_KEY, SECRET_KEY)
 
-my_config = {
+audio_config = {
     "encoding": "LINEAR16",
     "sample_rate_hertz": 8000,
     "num_channels": 1
 }
-stream_config = {"config": my_config}
+stream_config = {"config": audio_config}
 
 # recognise stream method call
 with open("path/to/audio/file", "rb") as source:
@@ -155,7 +163,7 @@ my_config["vad"] = vad
 #### Synthesize (TTS)
 Base types schema:
 ```Python
-definitions = {
+types_value_definitions = {
         "AudioEncoding": {
             "type": "string",
             "enum": ["LINEAR16", "ALAW", "MULAW", "LINEAR32F", "RAW_OPUS"]
@@ -194,7 +202,7 @@ Example of input file:
 ```
 commented lines # will not be synthesis
 
-Example of using TTS
+##### Example of using TTS
 ```python
 from tinkoff_voicekit_client import ClientTTS
 
@@ -202,7 +210,7 @@ API_KEY = "api_key"
 SECRET_KEY = "secret_key"
 
 client = ClientTTS(API_KEY, SECRET_KEY)
-my_config = {
+audio_config = {
     "audio_encoding": "LINEAR16",
     "sample_rate_hertz": 48000
 }
@@ -210,13 +218,13 @@ my_config = {
 
 # use it if you want work with proto results
 # audio file
-rows_responses = client.streaming_synthesize("path/to/file/with/text", my_config)
+rows_responses = client.streaming_synthesize("path/to/file/with/text", audio_config)
 # text
-rows_responses = client.streaming_synthesize("Мой красивый текст", my_config)
+rows_responses = client.streaming_synthesize("Мой красивый текст", audio_config)
 
 # use it if you want get audio file results
 # audio file
-client.synthesize_to_audio_wav("path/to/file/with/text", my_config, "output/dir")
+client.synthesize_to_audio_wav("path/to/file/with/text", audio_config, "output/dir")
 # text
-client.synthesize_to_audio_wav("Мой красивый текст", my_config, "output/dir")
+client.synthesize_to_audio_wav("Мой красивый текст", audio_config, "output/dir")
 ```

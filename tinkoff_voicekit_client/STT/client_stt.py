@@ -148,7 +148,6 @@ class ClientSTT(BaseClient):
             create_stream_requests(buffer, config),
             metadata=self._metadata.metadata
         )
-        print(responses.initial_metadata()[0][1])
 
         return dict_generator(responses)
 

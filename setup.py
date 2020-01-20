@@ -2,7 +2,7 @@ import setuptools
 from os.path import join, dirname
 from os import listdir
 
-version = "0.1.1"
+version = "0.1.2"
 
 with open(join(dirname(__file__), 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
