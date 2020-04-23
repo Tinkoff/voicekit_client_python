@@ -15,7 +15,7 @@ class ClientTTS(BaseClient):
     definitions = {
         "AudioEncoding": {
             "type": "string",
-            "enum": ["LINEAR16", "ALAW", "MULAW", "LINEAR32F", "RAW_OPUS"]
+            "enum": ["LINEAR16", "RAW_OPUS"]
         },
         "SynthesisInput": {
             "type": "object",

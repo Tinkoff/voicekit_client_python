@@ -1,7 +1,6 @@
 import os
-import sys
 
-path_to_opus_lib = os.path.join(sys.exec_prefix, "opuslibwin")
+path_to_opus_lib = os.path.join(os.path.dirname(os.path.abspath(__file__)), "opuslibwin")
 
 
 def configuration():

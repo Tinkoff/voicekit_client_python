@@ -11,8 +11,8 @@ pip install tinkoff-voicekit-client
 Before using you must have *API_KEY* and *SECRET_KEY*. You can get the keys by leaving a request on our [website](https://voicekit.tinkoff.ru/).
 
 Examples of using [VoiceKit](https://voicekit.tinkoff.ru/) client:
-* [Recognition examples](#####-Example-of-using-STT)
-* [Synthesize examples](#####-Example-of-using-TTS)
+* [Recognition examples](#example-of-using-stt)
+* [Synthesize examples](#synthesize-tts)
 
 Call documentation for public methods
 ```python
