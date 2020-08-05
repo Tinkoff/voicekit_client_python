@@ -171,7 +171,8 @@ types_value_definitions = {
         "SynthesisInput": {
             "type": "object",
             "properties": {
-                "text": {"type": "string"}
+                "text": {"type": "string"},
+                "ssml": {"type": "string"}
             }
         }
     }
@@ -227,4 +228,6 @@ rows_responses = client.streaming_synthesize("Мой красивый текст
 client.synthesize_to_audio_wav("path/to/file/with/text", audio_config, "output/dir")
 # text
 client.synthesize_to_audio_wav("Мой красивый текст", audio_config, "output/dir")
+# ssml. There are only tag <speak>
+client.synthesize_to_audio_wav("<speak>Мой красивый текст</speak>", audio_config, "output/dir", ssml=True)
 ```

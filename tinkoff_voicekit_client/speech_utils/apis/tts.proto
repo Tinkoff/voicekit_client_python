@@ -1,7 +1,9 @@
 syntax = "proto3";
 
 package tinkoff.cloud.tts.v1;
+option go_package = "stash.tcsbank.ru/stt/tinkoff_cloud_apis/pkg/tinkoff/cloud/tts/v1";
 
+import "google/protobuf/duration.proto";
 import "google/api/annotations.proto";
 
 
@@ -42,9 +44,15 @@ message ListVoicesResponses {
     repeated Voice voices = 1;
 }
 
+message TemplateInput {
+    string template = 1;
+    map<string, string> slots = 2;
+    string backup_phrase = 3;
+};
+
 message SynthesisInput {
     string text = 1;
-    reserved "ssml"; reserved 2;
+    string ssml = 2;
 }
 
 message VoiceSelectionParams {
@@ -54,26 +62,35 @@ message VoiceSelectionParams {
 }
 
 enum AudioEncoding {
-  ENCODING_UNSPECIFIED = 0;
-  LINEAR16 = 1;
-  reserved "FLAC"; reserved 2;
-  MULAW = 3;
-  reserved "AMR"; reserved 4;
-  reserved "AMR_WB"; reserved 5;
-  reserved "OGG_OPUS"; reserved 6;
-  reserved "SPEEX_WITH_HEADER_BYTE"; reserved 7;
-  ALAW = 8;
-  LINEAR32F = 9;
-  reserved "OGG_VORBIS"; reserved 10;
-  RAW_OPUS = 11;
-  reserved "MPEG_AUDIO"; reserved 12;
+    ENCODING_UNSPECIFIED = 0;
+    LINEAR16 = 1;
+    reserved "FLAC";
+    reserved 2;
+    MULAW = 3;
+    reserved "AMR";
+    reserved 4;
+    reserved "AMR_WB";
+    reserved 5;
+    reserved "OGG_OPUS";
+    reserved 6;
+    reserved "SPEEX_WITH_HEADER_BYTE";
+    reserved 7;
+    ALAW = 8;
+    LINEAR32F = 9;
+    reserved "OGG_VORBIS";
+    reserved 10;
+    RAW_OPUS = 11;
+    reserved "MPEG_AUDIO";
+    reserved 12;
 }
 
 message AudioConfig {
     AudioEncoding audio_encoding = 1;
     double speaking_rate = 2;
-    reserved "pitch"; reserved 3;
-    reserved "volume_gain_db"; reserved 4;
+    reserved "pitch";
+    reserved 3;
+    reserved "volume_gain_db";
+    reserved 4;
     int32 sample_rate_hertz = 5;
 }
 
@@ -81,6 +98,7 @@ message SynthesizeSpeechRequest {
     SynthesisInput input = 1;
     VoiceSelectionParams voice = 2;
     AudioConfig audio_config = 3;
+    TemplateInput template_input = 4;
 }
 
 message SynthesizeSpeechResponse {

@@ -66,7 +66,8 @@ class ClientTTS(BaseClient):
             self,
             text_source: str,
             config: dict,
-            text_encoding: str = "utf-8"
+            text_encoding: str = "utf-8",
+            ssml: bool = False
     ):
         """
         Description:
@@ -74,6 +75,7 @@ class ClientTTS(BaseClient):
             :param text_source: path to file with text or string with text
             :param config: dict conforming to streaming_synthesize_config_schema
             :param text_encoding: text encoding
+            :param ssml: enable ssml text source
         """
         validate(config, ClientTTS.streaming_synthesize_config_schema)
 
@@ -86,7 +88,10 @@ class ClientTTS(BaseClient):
             if not self._metadata.is_fresh_jwt():
                 self._metadata.refresh_jwt()
 
-            request.input.text = text
+            if ssml:
+                request.input.ssml = text
+            else:
+                request.input.text = text
             yield self._stub.StreamingSynthesize(request, metadata=self._metadata.metadata)
 
     def synthesize_to_audio_wav(
@@ -94,7 +99,8 @@ class ClientTTS(BaseClient):
             text_source: str,
             config: dict,
             output_dir: str = os.curdir,
-            text_encoding: str = "utf-8"
+            text_encoding: str = "utf-8",
+            ssml: bool = False
     ):
         """
         Description:
@@ -103,8 +109,9 @@ class ClientTTS(BaseClient):
             :param config: dict conforming to streaming_synthesize_config_schema
             :param output_dir: path to output directory where to store synthesized audio
             :param text_encoding: text encoding
+            :param ssml: enable ssml text source
         """
-        rows_responses = self.streaming_synthesize(text_source, config, text_encoding)
+        rows_responses = self.streaming_synthesize(text_source, config, text_encoding, ssml)
         os.makedirs(output_dir, exist_ok=True)
 
         for index, row_response in enumerate(rows_responses):
