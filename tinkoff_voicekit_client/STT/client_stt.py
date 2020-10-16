@@ -1,11 +1,16 @@
-from google.protobuf.json_format import MessageToDict
 from jsonschema import validate
 
-from tinkoff_voicekit_client.STT.helper_stt import get_proto_request, get_buffer, dict_generator, create_stream_requests
+from tinkoff_voicekit_client.STT.helper_stt import (
+    get_proto_request,
+    get_proto_longrunning_request,
+    create_stream_requests
+)
 from tinkoff_voicekit_client.speech_utils.BaseClient.base_client import BaseClient
-from tinkoff_voicekit_client.speech_utils.apis.stt_pb2_grpc import SpeechToTextStub
+from tinkoff_voicekit_client.speech_utils.apis.tinkoff.cloud.stt.v1.stt_pb2_grpc import SpeechToTextStub
 from tinkoff_voicekit_client.speech_utils.config_data import client_config
+from tinkoff_voicekit_client.speech_utils.core import get_buffer, dict_generator, response_format
 from tinkoff_voicekit_client.speech_utils.metadata import Metadata
+from tinkoff_voicekit_client.uploader import Uploader
 
 
 class ClientSTT(BaseClient):
@@ -61,6 +66,8 @@ class ClientSTT(BaseClient):
                 }
             },
             "enable_automatic_punctuation": {"type": "boolean"},
+            "enable_denormalization": {"type": "boolean"},
+            "enable_rescoring": {"type": "boolean"},
             "model": {"type": "string"},
             "num_channels": {"type": "number"},
             "do_not_perform_vad": {"type": "boolean"},
@@ -85,13 +92,25 @@ class ClientSTT(BaseClient):
         "additionalProperties": False
     }
 
+    long_running_recognition_config_schema = {
+        "type": "object",
+        "definitions": definitions,
+        "properties": {
+            "config": recognition_config_schema,
+            "group": {"type": "string"}
+        },
+        "additionalProperties": False
+    }
+
     def __init__(
             self,
             api_key: str,
             secret_key: str,
             host: str = client_config["host_stt"],
             port: int = client_config["port"],
-            ca_file: str = None
+            ssl_channel: bool = True,
+            ca_file: str = None,
+            uploader_config: dict = None
     ):
         """
         Create client for speech recognition.
@@ -100,54 +119,92 @@ class ClientSTT(BaseClient):
             :param host: Tinkoff Voicekit speech recognition host url
             :param port: Tinkoff Voicekit speech recognition port, default value: 443
             :param ca_file: optional certificate file
+            :uploader_config: config for Uploader
         """
-        super().__init__()
-        self._metadata = Metadata(api_key, secret_key, aud="STT")
+        super().__init__(host, port, ssl_channel, ca_file)
+        self._metadata = Metadata(api_key, secret_key, aud="tinkoff.cloud.stt")
         self._api_key = api_key
         self._secret_key = secret_key
-        self._channel = self._make_channel(host, port, ca_file)
         self._stub = SpeechToTextStub(self._channel)
 
-    def recognize(self, source, config):
+        uploader_config = {} if uploader_config is None else uploader_config
+        self._uploader = Uploader(self._api_key, self._secret_key, **uploader_config)
+
+    def recognize(self, source, config, metadata=None, dict_format=True):
         """
         Recognize whole audio and then return all responses.
             :param source: path to audio file or buffer with audio
             :param config: dict conforming to recognition_config_schema
+            :param dict_format: dict response instead of proto object
+            :param metadata: configure own metadata
         """
         validate(config, ClientSTT.recognition_config_schema)
         buffer = get_buffer(source)
 
-        if not self._metadata.is_fresh_jwt():
-            self._metadata.refresh_jwt()
-
         response = self._stub.Recognize(
             get_proto_request(buffer, config),
-            metadata=self._metadata.metadata
+            metadata=metadata if metadata else self._metadata.metadata
         )
+        return response_format(response, dict_format)
 
-        return MessageToDict(
-            response,
-            including_default_value_fields=True,
-            preserving_proto_field_name=True
-        )["results"]
-
-    def streaming_recognize(self, source, config):
+    def streaming_recognize(self, source, config, dict_format=True, metadata=None):
         """
         Recognize audio in streaming mode.
         Stream audio chunks to server and get streaming responses.
             :param source: path to audio file or audio stream
             :param config: dict conforming to streaming_recognition_config_schema
+            :param dict_format: dict response instead of proto object
+            :param metadata: configure own metadata
         """
         validate(config, ClientSTT.streaming_recognition_config_schema)
         buffer = get_buffer(source)
 
-        if not self._metadata.is_fresh_jwt():
-            self._metadata.refresh_jwt()
-
         responses = self._stub.StreamingRecognize(
             create_stream_requests(buffer, config),
-            metadata=self._metadata.metadata
+            metadata=metadata if metadata else self._metadata.metadata
         )
+        return dict_generator(responses, dict_format)
 
-        return dict_generator(responses)
+    def longrunning_recognize(self, source, config, dict_format=True, metadata=None):
+        """
+        Recognize audio in long running mode.
+            :param source: uri or buffer source
+            :param config: dict conforming to long_running_recognition_schema
+            :param dict_format: dict response instead of proto object
+            :param metadata: configure own metadata
+        """
+        validate(config, ClientSTT.long_running_recognition_config_schema)
+        if self._uploader.is_storage_uri(source):
+            buffer = source
+        else:
+            buffer = get_buffer(source)
 
+        response = self._stub.LongRunningRecognize(
+            get_proto_longrunning_request(buffer, config),
+            metadata=metadata if metadata else self._metadata.metadata
+        )
+        return response_format(response, dict_format)
+
+    def longrunning_recognize_with_uploader(
+            self,
+            source,
+            config: dict,
+            object_name: str = None,
+            dict_format=True, metadata=None
+    ):
+        """
+        Recognize audio in long running mode.
+            :param source: path to audio or fileobj
+            :param config: dict conforming to long_running_recognition_schema
+            :param object_name: name for object in storage (default: 'default_name_<utcnow>')
+            :param dict_format: dict response instead of proto object
+            :param metadata: configure own metadata
+        """
+        validate(config, ClientSTT.long_running_recognition_config_schema)
+        uri = self._uploader.upload(source, object_name)
+
+        response = self._stub.LongRunningRecognize(
+            get_proto_longrunning_request(uri, config),
+            metadata=metadata if metadata else self._metadata.metadata
+        )
+        return response_format(response, dict_format), uri

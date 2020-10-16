@@ -2,7 +2,7 @@ import json
 import os
 import wave
 from google.protobuf import json_format
-from tinkoff_voicekit_client.speech_utils.apis import tts_pb2
+from tinkoff_voicekit_client.speech_utils.apis.tinkoff.cloud.tts.v1 import tts_pb2
 
 
 def get_encoder(encoding: str, rate: int):
@@ -30,8 +30,15 @@ def save_synthesize_wav(
         wav_out.writeframes(audio_content)
 
 
-def get_config(config: dict):
-    return json_format.Parse(json.dumps(config), tts_pb2.AudioConfig())
+def get_proto_synthesize_request(config: dict):
+    grpc_request = tts_pb2.SynthesizeSpeechRequest()
+    grpc_request.audio_config.audio_encoding = tts_pb2.AudioEncoding.Value(config.get("audio_encoding", 0))
+    grpc_request.audio_config.speaking_rate = config.get("speaking_rate", 0)
+    grpc_request.audio_config.sample_rate_hertz = config.get("sample_rate_hertz", 0)
+    if "voice" in config:
+        grpc_voice_config = json_format.Parse(json.dumps(config["voice"]), tts_pb2.VoiceSelectionParams())
+        grpc_request.voice.CopyFrom(grpc_voice_config)
+    return grpc_request
 
 
 def get_utterance_generator(text_source):

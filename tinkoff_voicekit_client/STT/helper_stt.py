@@ -1,16 +1,13 @@
-import io
 import json
-import os
 import struct
 
 from google.protobuf import json_format
-from google.protobuf.json_format import MessageToDict
 
-from tinkoff_voicekit_client.speech_utils.apis import stt_pb2
+from tinkoff_voicekit_client.speech_utils.apis.tinkoff.cloud.stt.v1 import stt_pb2
 from tinkoff_voicekit_client.speech_utils.config_data import MAX_LENGTH, CHUNK_SIZE
 
 
-def get_proto_request(buffer, config):
+def get_proto_request(buffer, config: dict):
     buffer = buffer.read()
     if len(buffer) > MAX_LENGTH:
         raise ValueError(f"Max length of file greater than max: {MAX_LENGTH}")
@@ -19,6 +16,24 @@ def get_proto_request(buffer, config):
     grpc_request = stt_pb2.RecognizeRequest()
     grpc_request.config.CopyFrom(grpc_config)
     grpc_request.audio.content = buffer
+    return grpc_request
+
+
+def get_proto_longrunning_request(source, longrunning_config: dict):
+    buffer = None
+    if not isinstance(source, str):
+        buffer = source.read()
+        if len(buffer) > MAX_LENGTH:
+            raise ValueError(f"Max length of file greater than max: {MAX_LENGTH}")
+
+    grpc_config = json_format.Parse(json.dumps(longrunning_config["config"]), stt_pb2.RecognitionConfig())
+    grpc_request = stt_pb2.LongRunningRecognizeRequest()
+    grpc_request.config.CopyFrom(grpc_config)
+    grpc_request.group = longrunning_config.get("group", "")
+    if buffer:
+        grpc_request.audio.content = buffer
+    else:
+        grpc_request.audio.uri = source
     return grpc_request
 
 
@@ -48,25 +63,3 @@ def create_stream_requests(buffer, config: dict):
                 break
         request.audio_content = data
         yield request
-
-
-def dict_generator(responses):
-    for response in responses:
-        yield MessageToDict(
-            response,
-            including_default_value_fields=True,
-            preserving_proto_field_name=True
-        )["results"]
-
-
-def get_buffer(source):
-    if type(source) is str and os.path.isfile(source):
-        with open(source, "rb") as f:
-            buffer = f.read()
-        return io.BytesIO(buffer)
-    elif isinstance(source, io.BufferedReader):
-        return source
-    elif isinstance(source, io.BytesIO):
-        return source
-    else:
-        raise ValueError("Incorrect source parameters: must be path to file or io.BufferedReader")

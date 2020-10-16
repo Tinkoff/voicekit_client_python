@@ -10,5 +10,6 @@ language_code = "ru-RU"
 client_config = {
     "host_stt": "stt.tinkoff.ru",
     "host_tts": "tts.tinkoff.ru",
+    "host_operations": "api.tinkoff.ai",
     "port": 443
 }

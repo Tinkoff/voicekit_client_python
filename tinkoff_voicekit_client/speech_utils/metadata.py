@@ -8,11 +8,6 @@ import base64
 class Metadata:
     _TEN_MINUTES = 600
 
-    _AUD = {
-        "STT": "tinkoff.cloud.stt",
-        "TTS": "tinkoff.cloud.tts"
-    }
-
     _AUTH_PAYLOAD = {
         "iss": "best_issuer",
         "sub": "best_user",
@@ -25,8 +20,7 @@ class Metadata:
         "kid": None
     }
 
-    def __init__(self, api_key: str, secret_key: str, aud: str = None):
-        if aud is None: raise ValueError("Undefined type of metadata for STT or TTS")
+    def __init__(self, api_key: str, secret_key: str, aud: str):
         self._aud = aud
         self._api_key = api_key
         self._secret_key = secret_key
@@ -36,14 +30,14 @@ class Metadata:
             ["x-api-key", api_key],
         ]
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _create_jwt(self, api_key: str, secret_key: str):
         header = copy.deepcopy(Metadata._HEADER)
         header["kid"] = api_key
 
         auth_payload = copy.deepcopy(Metadata._AUTH_PAYLOAD)
-        auth_payload["aud"] = Metadata._AUD[self._aud]
+        auth_payload["aud"] = self._aud
         self._expiration_time = int(time()) + Metadata._TEN_MINUTES
         auth_payload["exp"] = self._expiration_time
 
@@ -69,5 +63,11 @@ class Metadata:
         return self._expiration_time > int(time())
 
     def refresh_jwt(self):
-        api_key = self.metadata[1][1]
-        self.metadata[0][1] = "Bearer {0}".format(self._create_jwt(api_key, self._secret_key))
+        api_key = self._metadata[1][1]
+        self._metadata[0][1] = "Bearer {0}".format(self._create_jwt(api_key, self._secret_key))
+
+    @property
+    def metadata(self):
+        if not self.is_fresh_jwt():
+            self.refresh_jwt()
+        return self._metadata

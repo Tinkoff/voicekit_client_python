@@ -1,7 +1,7 @@
 import setuptools
 from os.path import join, dirname
 
-version = "0.1.4"
+version = "0.2.2"
 
 with open(join(dirname(__file__), 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
