@@ -1,7 +1,7 @@
 import os
-from datetime import datetime
+import aioboto3
 
-import boto3
+from datetime import datetime
 
 
 class Uploader:
@@ -26,7 +26,7 @@ class Uploader:
         host = "https://{0}".format(Uploader.UPLOADER_HOST) if host is None else host
         self._api_key = api_key
         self._secret_key = secret_key
-        self._s3 = boto3.client(
+        self._s3 = aioboto3.client(
             service_name="s3",
             endpoint_url=host,
             aws_access_key_id=self._api_key,
@@ -34,7 +34,7 @@ class Uploader:
             verify=ca_file
         )
 
-    def upload(self, source: str, object_name: str = None):
+    async def upload(self, source: str, object_name: str = None):
         """
         Upload data from source for long running execution
         uri has next schema: storage://UPLOADER_HOST/_BUCKET/<object_name>
@@ -45,9 +45,10 @@ class Uploader:
         if object_name is None:
             object_name = f"default_name_{datetime.utcnow()}"
         if os.path.isfile(source):
-            self._s3.upload_file(source, Uploader._BUCKET, object_name)
+            async with self._s3 as s3:
+                await s3.upload_file(source, Uploader._BUCKET, object_name)
         else:
-            self._s3.upload_fileobj(source, Uploader._BUCKET, object_name)
+            await self._s3.upload_fileobj(source, Uploader._BUCKET, object_name)
         return "{0}{1}/{2}/{3}".format(
             Uploader.STORAGE_PREFIX,
             Uploader.UPLOADER_HOST,

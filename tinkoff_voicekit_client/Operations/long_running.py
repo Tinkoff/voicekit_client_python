@@ -111,7 +111,7 @@ class ClientOperations(BaseClient):
         self._secret_key = secret_key
         self._stub = OperationsStub(self._channel)
 
-    def get_operation(self, request: dict, metadata=None, dict_format=True):
+    async def get_operation(self, request: dict, metadata=None, dict_format=True):
         """
         Return operation by operation ID
             :param request: operation request
@@ -119,13 +119,13 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(request, ClientOperations.get_operation_config_schema)
-        response = self._stub.GetOperation(
+        response = await self._stub.GetOperation(
             get_proto_operation_request(request),
             metadata=metadata if metadata else self._metadata.metadata,
         )
         return response_format(response, dict_format)
 
-    def delete_operation(self, operation_filter: dict, metadata=None, dict_format=True):
+    async def delete_operation(self, operation_filter: dict, metadata=None, dict_format=True):
         """
         Delete all operations matching operation filter
             :param operation_filter: configure operation filter
@@ -133,13 +133,13 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(operation_filter, ClientOperations.operation_filter_config_schema)
-        response = self._stub.DeleteOperation(
+        response = await self._stub.DeleteOperation(
             get_proto_delete_operation_request(operation_filter),
             metadata=metadata if metadata else self._metadata.metadata,
         )
         return response_format(response, dict_format)
 
-    def cancel_operation(self, operation_filter: dict, metadata=None, dict_format=True):
+    async def cancel_operation(self, operation_filter: dict, metadata=None, dict_format=True):
         """
         Cancel all operations matching operation filter
             :param operation_filter: configure operation filter
@@ -147,13 +147,13 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(operation_filter, ClientOperations.operation_filter_config_schema)
-        response = self._stub.CancelOperation(
+        response = await self._stub.CancelOperation(
             get_proto_delete_operation_request(operation_filter),
             metadata=metadata if metadata else self._metadata.metadata,
         )
         return response_format(response, dict_format)
 
-    def list_operations(self, request: dict, metadata=None, dict_format=True):
+    async def list_operations(self, request: dict, metadata=None, dict_format=True):
         """
         Return list with operations
             :param request: configure list operation request
@@ -161,13 +161,13 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(request, ClientOperations.list_operations_config_schema)
-        response = self._stub.ListOperations(
+        response = await self._stub.ListOperations(
             get_proto_list_operations_request(request),
             metadata=metadata if metadata else self._metadata.metadata,
         )
         return response_format(response, dict_format)
 
-    def watch_operations(self, request: dict, metadata=None, dict_format=True):
+    async def watch_operations(self, request: dict, metadata=None, dict_format=True):
         """
         Watch operations
             :param request: watch operations request
@@ -175,13 +175,13 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(request, ClientOperations.watch_operations_config_schema)
-        response = self._stub.WatchOperations(
+        response = await self._stub.WatchOperations(
             get_proto_watch_operations_request(request),
             metadata=metadata if metadata else self._metadata.metadata,
         )
         return dict_generator(response, dict_format)
 
-    def wait_operation(self, request: dict, metadata=None, dict_format=True):
+    async def wait_operation(self, request: dict, metadata=None, dict_format=True):
         """
         Wait operation
             :param request: wait operation request
@@ -189,7 +189,7 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(request, ClientOperations.wait_operation_config_schema)
-        response = self._stub.WaitOperation(
+        response = await self._stub.WaitOperation(
             get_proto_wait_operation_request(request),
             metadata=metadata if metadata else self._metadata.metadata,
         )

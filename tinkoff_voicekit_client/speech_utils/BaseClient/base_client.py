@@ -1,4 +1,4 @@
-import grpc
+import aiogrpc
 
 from tinkoff_voicekit_client.speech_utils.config_data import MAX_LENGTH
 
@@ -41,10 +41,10 @@ class BaseClient:
         if self._ssl_channel:
             if self._ca_file:
                 with open(self._ca_file, "rb") as pem:
-                    creds = grpc.ssl_channel_credentials(pem.read())
+                    creds = aiogrpc.ssl_channel_credentials(pem.read())
             else:
-                creds = grpc.ssl_channel_credentials()
+                creds = aiogrpc.ssl_channel_credentials()
 
-            return grpc.secure_channel(target, creds, options=self._options)
+            return aiogrpc.secure_channel(target, creds, options=self._options)
         else:
-            return grpc.insecure_channel(target, options=self._options)
+            return aiogrpc.insecure_channel(target, options=self._options)

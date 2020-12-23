@@ -130,7 +130,7 @@ class ClientSTT(BaseClient):
         uploader_config = {} if uploader_config is None else uploader_config
         self._uploader = Uploader(self._api_key, self._secret_key, **uploader_config)
 
-    def recognize(self, source, config, metadata=None, dict_format=True):
+    async def recognize(self, source, config, metadata=None, dict_format=True):
         """
         Recognize whole audio and then return all responses.
             :param source: path to audio file or buffer with audio
@@ -139,7 +139,7 @@ class ClientSTT(BaseClient):
             :param metadata: configure own metadata
         """
         validate(config, ClientSTT.recognition_config_schema)
-        buffer = get_buffer(source)
+        buffer = await get_buffer(source)
 
         response = self._stub.Recognize(
             get_proto_request(buffer, config),
@@ -147,7 +147,7 @@ class ClientSTT(BaseClient):
         )
         return response_format(response, dict_format)
 
-    def streaming_recognize(self, source, config, dict_format=True, metadata=None):
+    async def streaming_recognize(self, source, config, dict_format=True, metadata=None):
         """
         Recognize audio in streaming mode.
         Stream audio chunks to server and get streaming responses.
@@ -157,7 +157,7 @@ class ClientSTT(BaseClient):
             :param metadata: configure own metadata
         """
         validate(config, ClientSTT.streaming_recognition_config_schema)
-        buffer = get_buffer(source)
+        buffer = await get_buffer(source)
 
         responses = self._stub.StreamingRecognize(
             create_stream_requests(buffer, config),
@@ -165,7 +165,7 @@ class ClientSTT(BaseClient):
         )
         return dict_generator(responses, dict_format)
 
-    def longrunning_recognize(self, source, config, dict_format=True, metadata=None):
+    async def longrunning_recognize(self, source, config, dict_format=True, metadata=None):
         """
         Recognize audio in long running mode.
             :param source: uri or buffer source
@@ -177,7 +177,7 @@ class ClientSTT(BaseClient):
         if self._uploader.is_storage_uri(source):
             buffer = source
         else:
-            buffer = get_buffer(source)
+            buffer = await get_buffer(source)
 
         response = self._stub.LongRunningRecognize(
             get_proto_longrunning_request(buffer, config),
@@ -185,7 +185,7 @@ class ClientSTT(BaseClient):
         )
         return response_format(response, dict_format)
 
-    def longrunning_recognize_with_uploader(
+    async def longrunning_recognize_with_uploader(
             self,
             source,
             config: dict,
@@ -201,9 +201,9 @@ class ClientSTT(BaseClient):
             :param metadata: configure own metadata
         """
         validate(config, ClientSTT.long_running_recognition_config_schema)
-        uri = self._uploader.upload(source, object_name)
+        uri = await self._uploader.upload(source, object_name)
 
-        response = self._stub.LongRunningRecognize(
+        response = await self._stub.LongRunningRecognize(
             get_proto_longrunning_request(uri, config),
             metadata=metadata if metadata else self._metadata.metadata
         )

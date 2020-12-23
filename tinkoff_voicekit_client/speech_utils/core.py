@@ -1,13 +1,14 @@
 import io
 import os
 
+from aiofiles import open
 from google.protobuf.json_format import MessageToDict
 
 
-def get_buffer(source):
+async def get_buffer(source):
     if type(source) is str and os.path.isfile(source):
-        with open(source, "rb") as f:
-            buffer = f.read()
+        async with open(source, "rb") as f:
+            buffer = await f.read()
         return io.BytesIO(buffer)
     elif isinstance(source, io.BufferedReader):
         return source

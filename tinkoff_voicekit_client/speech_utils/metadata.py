@@ -1,8 +1,8 @@
 import copy
-from time import time
 import hmac
 import json
 import base64
+from time import time
 
 
 class Metadata:
