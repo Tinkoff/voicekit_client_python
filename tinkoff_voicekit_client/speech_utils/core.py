@@ -28,13 +28,14 @@ def response_format(response, dict_format):
     return response
 
 
-def dict_generator(responses, dict_format):
+async def dict_generator(responses, dict_format):
     if dict_format:
-        for response in responses:
+        async for response in responses:
             yield MessageToDict(
                 response,
                 including_default_value_fields=True,
                 preserving_proto_field_name=True
             )
     else:
-        return responses
+         async for response in responses:
+             yield response

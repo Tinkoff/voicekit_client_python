@@ -175,7 +175,7 @@ class ClientOperations(BaseClient):
             :param dict_format: dict response instead of proto object
         """
         validate(request, ClientOperations.watch_operations_config_schema)
-        response = await self._stub.WatchOperations(
+        response = self._stub.WatchOperations(
             get_proto_watch_operations_request(request),
             metadata=metadata if metadata else self._metadata.metadata,
         )
