@@ -37,5 +37,5 @@ async def dict_generator(responses, dict_format):
                 preserving_proto_field_name=True
             )
     else:
-         async for response in responses:
-             yield response
+        async for response in responses:
+            yield response
