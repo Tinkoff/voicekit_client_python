@@ -23,9 +23,9 @@ class BaseClient:
         self._configure_channel(options)
         self._channel = self._make_channel()
 
-    def __del__(self):
-        if hasattr(self, "_channel"):
-            self._channel.close()
+    # def __del__(self):
+    #     if hasattr(self, "_channel"):
+    #         self._channel.close()
 
     def _configure_channel(self, options):
         if options:
