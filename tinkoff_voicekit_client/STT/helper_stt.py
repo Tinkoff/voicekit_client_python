@@ -1,5 +1,6 @@
 import json
 import struct
+import time
 
 from google.protobuf import json_format
 
@@ -42,7 +43,7 @@ def get_first_stream_config(config: dict):
     return grpc_config
 
 
-def create_stream_requests(buffer, config: dict):
+def create_stream_requests(buffer, rps: int, config: dict):
     request = stt_pb2.StreamingRecognizeRequest()
     request.streaming_config.CopyFrom(get_first_stream_config(config))
     yield request
@@ -62,4 +63,5 @@ def create_stream_requests(buffer, config: dict):
             if not data:
                 break
         request.audio_content = data
+        time.sleep(1/rps)
         yield request

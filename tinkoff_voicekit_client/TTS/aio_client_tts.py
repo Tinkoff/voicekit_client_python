@@ -2,20 +2,20 @@ import os
 
 from jsonschema import validate
 
-from tinkoff_voicekit_client.TTS import config_schema
 from tinkoff_voicekit_client.TTS.configurator_codec import configuration
+from tinkoff_voicekit_client.TTS import config_schema
 from tinkoff_voicekit_client.TTS.helper_tts import (
     get_utterance_generator,
     get_proto_synthesize_request,
     get_encoder, save_synthesize_wav
 )
-from tinkoff_voicekit_client.speech_utils.BaseClient.base_client import BaseClient
+from tinkoff_voicekit_client.speech_utils.BaseClient import aio_client
 from tinkoff_voicekit_client.speech_utils.apis.tinkoff.cloud.tts.v1.tts_pb2_grpc import TextToSpeechStub
 from tinkoff_voicekit_client.speech_utils.config_data import client_config, aud
 from tinkoff_voicekit_client.speech_utils.metadata import Metadata
 
 
-class ClientTTS(BaseClient):
+class ClientTTS(aio_client.BaseClient):
     def __init__(
             self,
             api_key: str,
@@ -38,7 +38,7 @@ class ClientTTS(BaseClient):
         self._metadata = Metadata(api_key, secret_key, aud=aud["tts"])
         self._stub = TextToSpeechStub(self._channel)
 
-    def streaming_synthesize(
+    async def streaming_synthesize(
             self,
             text_source: str,
             config: dict,
@@ -67,11 +67,11 @@ class ClientTTS(BaseClient):
                 request, metadata=metadata if metadata else self._metadata.metadata
             )
             if with_response_meta:
-                yield response, response.initial_metadata()
+                yield response, await response.initial_metadata()
             else:
                 yield response
 
-    def synthesize_to_audio_wav(
+    async def synthesize_to_audio_wav(
             self,
             text_source: str,
             config: dict,
@@ -99,14 +99,17 @@ class ClientTTS(BaseClient):
         os.makedirs(output_dir, exist_ok=True)
 
         response_meta = None
-        for index, row_response in enumerate(rows_responses):
-            response_meta = row_response.initial_metadata()
+        index = 0
+        async for row_response in rows_responses:
+            response_meta = await row_response.initial_metadata()
 
             audio_chunks = []
-            for response in row_response:
+            async for response in row_response:
                 audio_chunks += get_chunk(response.audio_chunk)
 
             save_synthesize_wav(bytes(audio_chunks),
                                 os.path.join(output_dir, f"{file_name}_{index}.wav"),
                                 config["sample_rate_hertz"])
+            index += 1
+
         return response_meta if with_response_meta else None

@@ -1,1 +1,2 @@
-from .long_running import ClientOperations
+from tinkoff_voicekit_client.Operations.long_running import ClientOperations
+from tinkoff_voicekit_client.Operations import aio_long_running as aio

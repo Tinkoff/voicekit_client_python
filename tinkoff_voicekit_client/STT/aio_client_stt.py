@@ -6,15 +6,15 @@ from tinkoff_voicekit_client.STT.helper_stt import (
     get_proto_longrunning_request,
     create_stream_requests
 )
-from tinkoff_voicekit_client.speech_utils.BaseClient.base_client import BaseClient
+from tinkoff_voicekit_client.speech_utils.BaseClient import aio_client
 from tinkoff_voicekit_client.speech_utils.apis.tinkoff.cloud.stt.v1.stt_pb2_grpc import SpeechToTextStub
 from tinkoff_voicekit_client.speech_utils.config_data import client_config, aud
-from tinkoff_voicekit_client.speech_utils.infrastructure import get_buffer, dict_generator, response_format
+from tinkoff_voicekit_client.speech_utils.infrastructure import get_buffer, aio_dict_generator, response_format
 from tinkoff_voicekit_client.speech_utils.metadata import Metadata
-from tinkoff_voicekit_client.Uploader.uploader import Uploader
+from tinkoff_voicekit_client.Uploader.aio_uploader import Uploader
 
 
-class ClientSTT(BaseClient):
+class ClientSTT(aio_client.BaseClient):
 
     def __init__(
             self,
@@ -27,7 +27,7 @@ class ClientSTT(BaseClient):
             uploader_config: dict = None
     ):
         """
-        Create client for speech recognition.
+        Create async client for speech recognition.
             :param api_key: client public api key
             :param secret_key: client secret api key
             :param host: Tinkoff Voicekit speech recognition host url
@@ -44,7 +44,7 @@ class ClientSTT(BaseClient):
         uploader_config = {} if uploader_config is None else uploader_config
         self._uploader = Uploader(self._api_key, self._secret_key, **uploader_config)
 
-    def recognize(self, source, config, metadata=None, dict_format=True, with_response_meta=False):
+    async def recognize(self, source, config, metadata=None, dict_format=True, with_response_meta=False):
         """
         Recognize whole audio and then return all responses.
             :param source: path to audio file or buffer with audio
@@ -56,15 +56,16 @@ class ClientSTT(BaseClient):
         validate(config, config_schema.recognition_config_schema)
         buffer = get_buffer(source)
 
-        response, unary_obj = self._stub.Recognize.with_call(
+        request = self._stub.Recognize(
             get_proto_request(buffer, config),
             metadata=metadata if metadata else self._metadata.metadata
         )
 
-        response_meta = unary_obj.initial_metadata() if with_response_meta else None
+        response_meta = await request.initial_metadata() if with_response_meta else None
+        response = await request
         return response_format(response, dict_format, response_meta)
 
-    def streaming_recognize(
+    async def streaming_recognize(
             self,
             source,
             config,
@@ -92,10 +93,10 @@ class ClientSTT(BaseClient):
         )
 
         if with_response_meta:
-            return dict_generator(responses, dict_format), responses.initial_metadata()
-        return dict_generator(responses, dict_format)
+            return aio_dict_generator(responses, dict_format), await responses.initial_metadata()
+        return aio_dict_generator(responses, dict_format)
 
-    def longrunning_recognize(self, source, config, dict_format=True, metadata=None, with_response_meta=False):
+    async def longrunning_recognize(self, source, config, dict_format=True, metadata=None, with_response_meta=False):
         """
         Recognize audio in long running mode.
             :param source: uri or buffer source
@@ -111,15 +112,15 @@ class ClientSTT(BaseClient):
         else:
             buffer = get_buffer(source)
 
-        response, unary_obj = self._stub.LongRunningRecognize.with_call(
+        request = self._stub.LongRunningRecognize(
             get_proto_longrunning_request(buffer, config),
             metadata=metadata if metadata else self._metadata.metadata
         )
-
-        response_meta = unary_obj.initial_metadata() if with_response_meta else None
+        response_meta = await request.initial_metadata() if with_response_meta else None
+        response = await request
         return response_format(response, dict_format, response_meta)
 
-    def longrunning_recognize_with_uploader(
+    async def longrunning_recognize_with_uploader(
             self,
             source,
             config: dict,
@@ -137,14 +138,16 @@ class ClientSTT(BaseClient):
             :param with_response_meta: return response with metadata
         """
         validate(config, config_schema.long_running_recognition_config_schema)
-        uri = self._uploader.upload(source, object_name)
+        uri = await self._uploader.upload(source, object_name)
 
-        response, unary_obj = self._stub.LongRunningRecognize.with_call(
+        request = self._stub.LongRunningRecognize(
             get_proto_longrunning_request(uri, config),
             metadata=metadata if metadata else self._metadata.metadata
         )
+
+        response = await request
         if with_response_meta:
-            response_meta = unary_obj.initial_metadata()
+            response_meta = await request.initial_metadata()
             return (*response_format(response, dict_format, response_meta), uri)
         else:
             return response_format(response, dict_format), uri

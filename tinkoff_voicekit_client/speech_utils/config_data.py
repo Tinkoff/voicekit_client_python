@@ -13,3 +13,9 @@ client_config = {
     "host_operations": "api.tinkoff.ai",
     "port": 443
 }
+
+aud = {
+    "stt": "tinkoff.cloud.stt",
+    "tts": "tinkoff.cloud.tts",
+    "operations": "tinkoff.cloud.longrunning"
+}

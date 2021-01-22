@@ -1,6 +1,7 @@
 # Tinkoff Python [VoiceKit](https://voicekit.tinkoff.ru/) API Library
 [![Downloads](https://pepy.tech/badge/tinkoff-voicekit-client)](https://pepy.tech/project/tinkoff-voicekit-client)
 [![Maintainability](https://api.codeclimate.com/v1/badges/263d75fe1c9d4f2bfd1a/maintainability)](https://codeclimate.com/github/TinkoffCreditSystems/voicekit_client_python/maintainability)
+![Build](https://github.com/TinkoffCreditSystems/voicekit_client_python/workflows/Upload%20Python%20Package/badge.svg)
 
 ### Usage
 #### Install from [PyPi](https://pypi.org/project/tinkoff-voicekit-client/)

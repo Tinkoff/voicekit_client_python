@@ -1,7 +1,7 @@
 import setuptools
 from os.path import join, dirname
 
-version = "0.2.2"
+version = "0.3.0"
 
 with open(join(dirname(__file__), 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -19,6 +19,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=setuptools.find_packages(),
+    test_suite="tests",
+    setup_requires=[
+        "pytest-runner",
+    ],
+    tests_require=[
+        "pytest",
+    ],
     include_package_data=True,
     install_requires=requirements,
 )

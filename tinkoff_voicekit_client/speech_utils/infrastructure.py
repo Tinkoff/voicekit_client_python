@@ -17,14 +17,19 @@ def get_buffer(source):
         raise ValueError("Incorrect source parameters: must be path to file or io.BufferedReader")
 
 
-def response_format(response, dict_format):
+def response_format(response, dict_format, response_metadata=None):
     if dict_format:
-        return MessageToDict(
+        _response = MessageToDict(
             response,
             including_default_value_fields=True,
             preserving_proto_field_name=True
         )
-    return response
+    else:
+        _response = response
+
+    if response_metadata:
+        return _response, response_metadata
+    return _response
 
 
 def dict_generator(responses, dict_format):
@@ -36,4 +41,18 @@ def dict_generator(responses, dict_format):
                 preserving_proto_field_name=True
             )
     else:
-        return responses
+        for response in responses:
+            yield response
+
+
+async def aio_dict_generator(responses, dict_format):
+    if dict_format:
+        async for response in responses:
+            yield MessageToDict(
+                response,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True
+            )
+    else:
+        async for response in responses:
+            yield response

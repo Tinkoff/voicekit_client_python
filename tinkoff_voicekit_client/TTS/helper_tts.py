@@ -41,8 +41,18 @@ def get_proto_synthesize_request(config: dict):
     return grpc_request
 
 
-def get_utterance_generator(text_source):
-    return generate_file_utterances if os.path.isfile(text_source) else generate_text_utterances
+def get_utterance_generator(text_source, text_encoding: str, enable_ssml: bool):
+    if os.path.isfile(text_source):
+        utterances_generator = generate_file_utterances
+    else:
+        utterances_generator = generate_text_utterances
+    for text in utterances_generator(text_source, text_encoding):
+        synthesis_input = tts_pb2.SynthesisInput()
+        if enable_ssml:
+            synthesis_input.ssml = text
+        else:
+            synthesis_input.text = text
+        yield synthesis_input
 
 
 def generate_utterance(line: str):
@@ -54,9 +64,7 @@ def generate_file_utterances(text_file: str, text_encoding: str):
     with open(text_file, "r", encoding=text_encoding) as f:
         for line in f:
             result = generate_utterance(line)
-            if result is None:
-                continue
-            else:
+            if result is not None:
                 yield result
 
 
