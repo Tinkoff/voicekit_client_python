@@ -20,6 +20,15 @@ def test_streaming_recognize(client_stt, audio_data):
         print(response)
 
 
+def test_profanity_filter(client_stt, audio_with_profanity_lexic):
+    response, meta = client_stt.recognize(
+        audio_with_profanity_lexic["source"],
+        audio_with_profanity_lexic["config"],
+        with_response_meta=True,
+    )
+    print(response)
+
+
 def test_long_running_recognize(client_stt, audio_data, client_operations):
     long_running_config = {
         "config": audio_data["config"],

@@ -68,3 +68,14 @@ def synthesis_config():
         "sample_rate_hertz": 48000
     }
 
+@pytest.fixture
+def audio_with_profanity_lexic():
+    audio_data = {}
+    audio_data["config"] = {
+        "encoding": "LINEAR16",
+        "sample_rate_hertz": 48000,
+        "num_channels": 1,
+        "profanity_filter": True,
+    }
+    audio_data["source"] = "./tests/audio_source/profanity_lexic.wav"
+    return audio_data

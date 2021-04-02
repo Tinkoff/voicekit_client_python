@@ -55,7 +55,8 @@ recognition_config_schema = {
         "model": {"type": "string"},
         "num_channels": {"type": "number"},
         "do_not_perform_vad": {"type": "boolean"},
-        "vad_config": {"$ref": "#/definitions/VoiceActivityDetectionConfig"}
+        "vad_config": {"$ref": "#/definitions/VoiceActivityDetectionConfig"},
+        "profanity_filter": {"type": "boolean"}
     },
     "required": [
         "sample_rate_hertz",
