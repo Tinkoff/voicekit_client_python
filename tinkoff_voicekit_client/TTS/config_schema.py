@@ -16,7 +16,23 @@ definitions = {
             "language_code": {"type": "string"},
             "name": {
                 "type": "string",
-                "enum": ["alyona", "oleg", "maxim", "flirt"]
+                "enum": [ 
+                    "oleg", 
+                    "maxim", 
+                    "flirt",
+                    "alyona",
+                    "alyona:sad",
+                    "alyona:funny",
+                    "alyona:flirt",
+                    "dorofeev",
+                    "dorofeev:drama",
+                    "dorofeev:comedy", 
+                    "dorofeev:info",
+                    "dorofeev:tragedy",
+                    "dorofeev:neutral",
+                    "voituk:direct",
+                    "voituk:narrative"
+                    ]
             },
             "ssml_gender": {
                 "type": "string",
