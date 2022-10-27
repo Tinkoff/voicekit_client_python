@@ -121,7 +121,18 @@ definitions = {
             "language_code": {"type": "string"},
             "name": {
                 "type": "string",
-                "enum": ["alyona", "oleg", "maxim", "flirt"]
+                "enum": [  
+                    "maxim", 
+                    "alyona",
+                    "alyona:sad",
+                    "alyona:funny",
+                    "alyona:flirt",
+                    "dorofeev",
+                    "dorofeev:drama",
+                    "dorofeev:comedy", 
+                    "dorofeev:info",
+                    "dorofeev:tragedy"
+                    ]
             },
             "ssml_gender": {
                 "type": "string",
