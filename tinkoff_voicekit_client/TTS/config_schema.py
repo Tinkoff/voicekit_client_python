@@ -16,10 +16,8 @@ definitions = {
             "language_code": {"type": "string"},
             "name": {
                 "type": "string",
-                "enum": [ 
-                    "oleg", 
-                    "maxim", 
-                    "flirt",
+                "enum": [  
+                    "maxim",
                     "alyona",
                     "alyona:sad",
                     "alyona:funny",
@@ -28,10 +26,7 @@ definitions = {
                     "dorofeev:drama",
                     "dorofeev:comedy", 
                     "dorofeev:info",
-                    "dorofeev:tragedy",
-                    "dorofeev:neutral",
-                    "voituk:direct",
-                    "voituk:narrative"
+                    "dorofeev:tragedy"
                     ]
             },
             "ssml_gender": {
